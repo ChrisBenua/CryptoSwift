@@ -245,8 +245,8 @@ public final class SHA2: DigestType {
       M.deinitialize(count: self.k.count)
       M.deallocate()
     }
-
-    for x in 0..<self.k.count {
+    var x = 0
+    while x < self.k.count {
       switch x {
         case 0...15:
           let start = chunk.startIndex.advanced(by: x * 4) // * MemoryLayout<UInt32>.size
@@ -256,6 +256,7 @@ public final class SHA2: DigestType {
           let s1 = rotateRight(M[x - 2], by: 17) ^ rotateRight(M[x - 2], by: 19) ^ (M[x - 2] >> 10)
           M[x] = M[x - 16] &+ s0 &+ M[x - 7] &+ s1
       }
+      x += 1
     }
 
     var A = hh[0]
@@ -268,7 +269,8 @@ public final class SHA2: DigestType {
     var H = hh[7]
 
     // Main loop
-    for j in 0..<self.k.count {
+    var j = 0
+    while j < self.k.count {
       let s0 = rotateRight(A, by: 2) ^ rotateRight(A, by: 13) ^ rotateRight(A, by: 22)
       let maj = (A & B) ^ (A & C) ^ (B & C)
       let t2 = s0 &+ maj
@@ -284,6 +286,8 @@ public final class SHA2: DigestType {
       C = B
       B = A
       A = t1 &+ t2
+        
+      j += 1
     }
 
     hh[0] = hh[0] &+ A
