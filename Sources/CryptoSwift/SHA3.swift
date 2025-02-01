@@ -115,9 +115,10 @@ public final class SHA3: DigestType {
       d.deinitialize(count: 5)
       d.deallocate()
     }
-
-    for i in 0..<5 {
+    var i = 0
+   while i < 5 {
       c[i] = a[i] ^ a[i &+ 5] ^ a[i &+ 10] ^ a[i &+ 15] ^ a[i &+ 20]
+       i += 1
     }
 
     d[0] = rotateLeft(c[1], by: 1) ^ c[4]
@@ -126,12 +127,14 @@ public final class SHA3: DigestType {
     d[3] = rotateLeft(c[4], by: 1) ^ c[2]
     d[4] = rotateLeft(c[0], by: 1) ^ c[3]
 
-    for i in 0..<5 {
+    i = 0
+    while i < 5 {
       a[i] ^= d[i]
       a[i &+ 5] ^= d[i]
       a[i &+ 10] ^= d[i]
       a[i &+ 15] ^= d[i]
       a[i &+ 20] ^= d[i]
+      i += 1
     }
   }
 
@@ -167,7 +170,8 @@ public final class SHA3: DigestType {
   /// For all triples (x, y, z) such that 0≤x<5, 0≤y<5, and 0≤z<w, let
   /// A′[x, y,z] = A[x, y,z] ⊕ ((A[(x+1) mod 5, y, z] ⊕ 1) ⋅ A[(x+2) mod 5, y, z])
   private func χ(_ a: inout Array<UInt64>) {
-    for i in stride(from: 0, to: 25, by: 5) {
+    var i = 0
+    while i < 25 {
       let a0 = a[0 &+ i]
       let a1 = a[1 &+ i]
       a[0 &+ i] ^= ~a1 & a[2 &+ i]
@@ -175,6 +179,7 @@ public final class SHA3: DigestType {
       a[2 &+ i] ^= ~a[3 &+ i] & a[4 &+ i]
       a[3 &+ i] ^= ~a[4 &+ i] & a0
       a[4 &+ i] ^= ~a0 & a1
+      i += 5
     }
   }
 
