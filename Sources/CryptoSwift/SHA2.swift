@@ -276,7 +276,7 @@ public final class SHA2: DigestType {
       let t2 = s0 &+ maj
       let s1 = rotateRight(E, by: 6) ^ rotateRight(E, by: 11) ^ rotateRight(E, by: 25)
       let ch = (E & F) ^ ((~E) & G)
-      let t1 = H &+ s1 &+ ch &+ UInt32(self.k[j]) &+ M[j]
+      let t1 = H &+ s1 &+ ch &+ UInt32(truncatingIfNeeded: self.k[j]) &+ M[j]
 
       H = G
       G = F
@@ -338,17 +338,22 @@ extension SHA2: Updatable {
     switch self.variant {
       case .sha224, .sha256:
         var pos = 0
-        for idx in 0..<self.accumulatedHash32.count where idx < self.variant.finalLength {
+        var idx = 0
+        while idx < self.accumulatedHash32.count {
+          guard idx < self.variant.finalLength else { idx += 1; continue }
           let h = accumulatedHash32[idx]
           result[pos + 0] = UInt8((h >> 24) & 0xff)
           result[pos + 1] = UInt8((h >> 16) & 0xff)
           result[pos + 2] = UInt8((h >> 8) & 0xff)
           result[pos + 3] = UInt8(h & 0xff)
           pos += 4
+          idx += 1
         }
       case .sha384, .sha512:
         var pos = 0
-        for idx in 0..<self.accumulatedHash64.count where idx < self.variant.finalLength {
+        var idx = 0
+        while idx < self.accumulatedHash64.count {
+          guard idx < self.variant.finalLength else { idx += 1; continue }
           let h = accumulatedHash64[idx]
           result[pos + 0] = UInt8((h >> 56) & 0xff)
           result[pos + 1] = UInt8((h >> 48) & 0xff)
@@ -359,6 +364,7 @@ extension SHA2: Updatable {
           result[pos + 6] = UInt8((h >> 8) & 0xff)
           result[pos + 7] = UInt8(h & 0xff)
           pos += 8
+          idx += 1
         }
     }
 
@@ -366,7 +372,7 @@ extension SHA2: Updatable {
     if isLast {
       switch self.variant {
         case .sha224, .sha256:
-          self.accumulatedHash32 = self.variant.h.lazy.map { UInt32($0) } // FIXME: UInt64 for process64
+          self.accumulatedHash32 = self.variant.h.lazy.map { UInt32(truncatingIfNeeded: $0) } // FIXME: UInt64 for process64
         case .sha384, .sha512:
           self.accumulatedHash64 = self.variant.h
       }

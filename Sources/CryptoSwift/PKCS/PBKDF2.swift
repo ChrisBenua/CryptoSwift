@@ -109,8 +109,10 @@ private extension PKCS5.PBKDF2 {
       var i = 2
       while i <= iterations {
         u = try prf.authenticate(u)
-        for x in 0..<ret.count {
+        var x = 0
+        while x < ret.count {
           ret[x] = ret[x] ^ u[x]
+          x += 1
         }
         i += 1
       }
