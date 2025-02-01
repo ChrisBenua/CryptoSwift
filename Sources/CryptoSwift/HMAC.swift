@@ -107,12 +107,16 @@ public final class HMAC: Authenticator {
 
   public func authenticate(_ bytes: Array<UInt8>) throws -> Array<UInt8> {
     var opad = Array<UInt8>(repeating: 0x5c, count: variant.blockSize())
-    for idx in self.key.indices {
+    var idx = 0
+    while idx < key.count {
       opad[idx] = self.key[idx] ^ opad[idx]
+      idx += 1
     }
     var ipad = Array<UInt8>(repeating: 0x36, count: variant.blockSize())
-    for idx in self.key.indices {
+    idx = 0
+    while idx < key.count {
       ipad[idx] = self.key[idx] ^ ipad[idx]
+      idx += 1
     }
 
     let ipadAndMessageHash = self.variant.calculateHash(ipad + bytes)

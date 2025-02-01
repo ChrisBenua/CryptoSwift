@@ -198,7 +198,8 @@ private extension Scrypt {
     self.salsaBlock.copyMemory(from: UnsafeRawPointer(block), byteCount: 64)
     let salsaBlockTyped = self.salsaBlock.assumingMemoryBound(to: UInt32.self)
 
-    for _ in stride(from: 0, to: 8, by: 2) {
+    var i = 0
+    while i < 8 {
       salsaBlockTyped[4] ^= rotateLeft(salsaBlockTyped[0] &+ salsaBlockTyped[12], by: 7)
       salsaBlockTyped[8] ^= rotateLeft(salsaBlockTyped[4] &+ salsaBlockTyped[0], by: 9)
       salsaBlockTyped[12] ^= rotateLeft(salsaBlockTyped[8] &+ salsaBlockTyped[4], by: 13)
@@ -238,9 +239,14 @@ private extension Scrypt {
       salsaBlockTyped[13] ^= rotateLeft(salsaBlockTyped[12] &+ salsaBlockTyped[15], by: 9)
       salsaBlockTyped[14] ^= rotateLeft(salsaBlockTyped[13] &+ salsaBlockTyped[12], by: 13)
       salsaBlockTyped[15] ^= rotateLeft(salsaBlockTyped[14] &+ salsaBlockTyped[13], by: 18)
+        
+      i += 2
     }
-    for i in 0 ..< 16 {
+    
+    i = 0
+    while i < 16 {
       block[i] = block[i] &+ salsaBlockTyped[i]
+      i += 1
     }
   }
 
@@ -249,8 +255,10 @@ private extension Scrypt {
     let S = src.assumingMemoryBound(to: UInt64.self)
     let L = len / MemoryLayout<UInt64>.size
 
-    for i in 0 ..< L {
+    var i = 0
+    while i < L {
       D[i] ^= S[i]
+      i += 1
     }
   }
 }

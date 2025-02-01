@@ -106,11 +106,13 @@ private extension PKCS5.PBKDF2 {
     if iterations > 1 {
       // U_2 = PRF (P, U_1) ,
       // U_c = PRF (P, U_{c-1}) .
-      for _ in 2...iterations {
+      var i = 2
+      while i <= iterations {
         u = try prf.authenticate(u)
         for x in 0..<ret.count {
           ret[x] = ret[x] ^ u[x]
         }
+        i += 1
       }
     }
     return ret
